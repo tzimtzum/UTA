@@ -12,7 +12,7 @@ export default function Home() {
   useEffect(() => {
     try {
       const today = new Date();
-      const hdate = new HDate(today); // 🛠️ Correct usage without Location object
+      const hdate = new HDate(today);
       setHebrewDate(hdate.renderGematriya());
     } catch (err) {
       console.error('🧨 Error setting Hebrew date:', err);
@@ -33,6 +33,26 @@ export default function Home() {
     } catch (err) {
       console.error(err);
       setOutput('❌ Error submitting to Guru.');
+    }
+  };
+
+  // Dynamic placeholder logic
+  const getPlaceholder = () => {
+    switch (mode) {
+      case 'shiur':
+        return 'e.g., Give a shiur on chazaka including Reb Chaim’s chakira.';
+      case 'quick':
+        return 'e.g., What is a shaliach l’dvar aveirah?';
+      case 'dvar':
+        return 'e.g., A Dvar Torah for Shabbat with a moral lesson and story.';
+      case 'teshuva':
+        return 'e.g., Can I eat meat cooked in a dairy pot?';
+      case 'chavruta':
+        return 'e.g., What would you like to learn together? Or ask me to choose!';
+      case 'story':
+        return 'e.g., A funny chassidic story connected to this week’s parsha.';
+      default:
+        return 'Enter your Torah query or request...';
     }
   };
 
@@ -62,6 +82,7 @@ export default function Home() {
         <option value="teshuva">Teshuva (Halachic Q&A)</option>
         <option value="chavruta">Chavruta Mode</option>
         <option value="story">Heimishe Story</option>
+        {/* Future: <option value="simcha-speech">Simcha Speech Builder</option> */}
       </select>
 
       {/* Conditional Derech HaLimud */}
@@ -91,7 +112,7 @@ export default function Home() {
         rows={5}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        placeholder={`e.g., Give a shiur on chazaka including the chakira of Reb Chaim Soloveitchik.`}
+        placeholder={getPlaceholder()}
       />
 
       {/* Submit */}
@@ -110,6 +131,7 @@ export default function Home() {
     </main>
   );
 }
+
 
 
 
