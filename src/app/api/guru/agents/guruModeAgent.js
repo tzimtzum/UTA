@@ -1,6 +1,6 @@
-'use client';
+// src/app/api/guru/agents/'use client';
 import { useState, useEffect } from 'react';
-import { HDate } from '@hebcal/core';
+import { HDate, Location } from '@hebcal/core';
 
 export default function Home() {
   const [prompt, setPrompt] = useState('');
@@ -12,7 +12,14 @@ export default function Home() {
   useEffect(() => {
     try {
       const today = new Date();
-      const hdate = new HDate(today); // 🛠️ Correct usage without Location object
+      const jerusalem = new Location({
+        name: 'Jerusalem',
+        latitude: 31.7767,
+        longitude: 35.2345,
+        elevation: 800,
+        tzid: 'Asia/Jerusalem'
+      });
+      const hdate = new HDate(today, jerusalem);
       setHebrewDate(hdate.renderGematriya());
     } catch (err) {
       console.error('🧨 Error setting Hebrew date:', err);
@@ -59,9 +66,9 @@ export default function Home() {
         <option value="shiur">Shiur Developer</option>
         <option value="quick">Quick Question</option>
         <option value="dvar">Dvar Torah</option>
-        <option value="teshuva">Teshuva (Halachic Q&A)</option>
-        <option value="chavruta">Chavruta Mode</option>
-        <option value="story">Heimishe Story</option>
+        {/* Placeholder for future modes */}
+        {/* <option value="gematria">Gematria Explorer</option> */}
+        {/* <option value="simcha-speech">Simcha Speech Builder</option> */}
       </select>
 
       {/* Conditional Derech HaLimud */}
@@ -111,11 +118,37 @@ export default function Home() {
   );
 }
 
+import { runGuruCheck } from "../utils/guruUtils";
+import guruProtocol from "../utils/guruProtocol.json";
 
+export async function guruModeAgent({ compiledOutput, strategy }) {
+  const { violations, passed } = await runGuruCheck(compiledOutput, strategy, guruProtocol);
 
+  if (!passed) {
+    return {
+      type: "guruViolation",
+      content: `❌ Guru Mode Violation Detected:\n${violations.join("\n")}`,
+      rerun: true,
+      log: {
+        strategy,
+        time: new Date().toISOString(),
+        error: violations
+      }
+    };
+  }
 
+  return {
+    type: "guruValidated",
+    content: "✅ Output passed Guru Mode validation.",
+    rerun: false,
+    log: {
+      strategy,
+      time: new Date().toISOString(),
+      confirmation: "Passed"
+    }
+  };
+} 
 
-
-
-
-
+// This agent must always run last.
+// It determines whether to allow final response or rerun agents with stricter enforcement.
+// It also logs metadata for accountability and future analysis.
