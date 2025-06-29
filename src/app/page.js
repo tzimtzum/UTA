@@ -36,7 +36,6 @@ export default function Home() {
     }
   };
 
-  // Dynamic placeholder logic
   const getPlaceholder = () => {
     switch (mode) {
       case 'shiur':
@@ -51,6 +50,10 @@ export default function Home() {
         return 'e.g., What would you like to learn together? Or ask me to choose!';
       case 'story':
         return 'e.g., A funny chassidic story connected to this week’s parsha.';
+      case 'simcha':
+        return 'e.g., Speech for a bar mitzvah boy who loves basketball.';
+      case 'sugyaTree':
+        return 'e.g., Create a sugya tree for yayin touched by a non-Jew.';
       default:
         return 'Enter your Torah query or request...';
     }
@@ -58,7 +61,7 @@ export default function Home() {
 
   return (
     <main className="p-6 max-w-3xl mx-auto font-serif text-lg">
-      <h1 className="text-3xl font-bold text-center mb-2">Ultimate Torah Assistant</h1>
+      <h1 className="text-3xl font-bold text-center mb-2">Ultimate Torah Assistant (Guru Mode)</h1>
       <p className="text-center italic mb-1">
         מה־אהבתי תורתך כל־היום היא שיחתי<br />
         <span className="text-sm">"How I love Your Torah; all day it is my meditation" (תהילים קי״ט:צ״ז)</span>
@@ -82,7 +85,8 @@ export default function Home() {
         <option value="teshuva">Teshuva (Halachic Q&A)</option>
         <option value="chavruta">Chavruta Mode</option>
         <option value="story">Heimishe Story</option>
-        {/* Future: <option value="simcha-speech">Simcha Speech Builder</option> */}
+        <option value="simcha">Simcha Speech Builder</option>
+        <option value="sugyaTree">Sugya Tree Mode</option>
       </select>
 
       {/* Conditional Derech HaLimud */}
