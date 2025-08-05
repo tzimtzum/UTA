@@ -1,22 +1,48 @@
 // src/app/api/guru/agents/gematriaEngine.js
 
-import { hebrewToNumber, numberToMatchingWords } from './gematriaUtils.js';
+const {
+  calculateGematria,
+  breakdownHebrewWord,
+  numberToMatchingWords,
+  getDvarTorah
+} = require('./utils/gematriaUtils.js');
 
-export async function generateGematriaDvarTorah(input) {
-  const { type, value } = input;
+export async function generateGematriaOutput(input) {
+  const {
+    type,
+    value,
+    gematriaType = 'standard',
+    createDvarTorah = false
+  } = input;
+
+  if (!value) {
+    return "❌ No input provided.";
+  }
+
+  let numericValue;
+  let breakdown = '';
+  let matches = [];
 
   if (type === 'number') {
-    const matches = await numberToMatchingWords(value);
-    return `🔢 Gematria ${value} Matches:\n\n${matches.join('\n')}`;
+    numericValue = parseInt(value, 10);
+    matches = await numberToMatchingWords(numericValue, gematriaType);
   }
 
   if (type === 'hebrew') {
-    const numericValue = hebrewToNumber(value);
-    const matches = await numberToMatchingWords(numericValue);
-    return `🔡 Hebrew: ${value}\n🔢 Gematria: ${numericValue}\n\n📖 Matches:\n${matches.join('\n')}`;
+    numericValue = calculateGematria(value, gematriaType);
+    breakdown = breakdownHebrewWord(value, gematriaType);
+    matches = await numberToMatchingWords(numericValue, gematriaType);
   }
 
-  return "❌ Invalid input. Provide either a Hebrew word or number.";
+  let response = `🔡 Hebrew: ${value}\n🔢 Gematria (${gematriaType}): ${numericValue}\n\n🧩 Breakdown:\n${breakdown}\n\n📖 Matches:\n${matches.join('\n')}`;
+
+  if (createDvarTorah) {
+    const dvar = await getDvarTorah(value, numericValue, matches);
+    response += `\n\n💬 Dvar Torah:\n${dvar}`;
+  }
+
+  return response;
 }
+
 
 
