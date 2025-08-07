@@ -10,11 +10,11 @@ export default function Home() {
   const [output, setOutput] = useState('');
   const [hebrewDate, setHebrewDate] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
-  const [profile, setProfile] = useState({ level: '', affiliation: '', years: '', notes: '' });
   const [progress, setProgress] = useState(0);
   const [placeholder, setPlaceholder] = useState('Describe your request...');
   const outputRef = useRef(null);
 
+  const [profile, setProfile] = useState({ level: '', affiliation: '', years: '', notes: '' });
   const [shiurAudience, setShiurAudience] = useState('');
   const [chavrutaPartner, setChavrutaPartner] = useState('');
   const [storyType, setStoryType] = useState('');
@@ -24,7 +24,13 @@ export default function Home() {
   const [dvarOccasion, setDvarOccasion] = useState('');
   const [dvarStyle, setDvarStyle] = useState('');
   const [gematriaType, setGematriaType] = useState('');
-  const [deliverables, setDeliverables] = useState({ sourceSheet: false, audio: false, chart: false, summary: false, teacherGuide: false });
+  const [deliverables, setDeliverables] = useState({
+    sourceSheet: false,
+    audio: false,
+    chart: false,
+    summary: false,
+    teacherGuide: false
+  });
 
   const derechOptions = {
     Tanach: ["No Specific Derech", "Choose For Me", "Other", "Nechama Leibowitz", "Rav Menachem Leibtag", "Shani Taragin", "Rav Yaakov Medan"],
@@ -36,47 +42,64 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const today = new Date();
     try {
-      const today = new Date();
       const hdate = new HDate(today);
       setHebrewDate(hdate.renderGematriya());
-    } catch (err) {
+    } catch {
       setHebrewDate('⚠️ Error calculating date.');
     }
+    console.log("✅ Loaded authoritative page.js");
   }, []);
 
   useEffect(() => {
-    if (mode === 'shiur') setPlaceholder('Enter a sugya or shiur topic...');
-    else if (mode === 'story') setPlaceholder('Describe the story goal or characters...');
-    else if (mode === 'gematria') setPlaceholder('Enter a Hebrew word or phrase...');
-    else if (mode === 'dvar') setPlaceholder('What theme or occasion is the Dvar Torah for?');
-    else setPlaceholder('Describe your request...');
+    switch (mode) {
+      case 'shiur':
+        setPlaceholder('Enter a sugya or shiur topic...');
+        break;
+      case 'story':
+        setPlaceholder('Describe the story goal or characters...');
+        break;
+      case 'gematria':
+        setPlaceholder('Enter a Hebrew word or phrase...');
+        break;
+      case 'dvar':
+        setPlaceholder('What theme or occasion is the Dvar Torah for?');
+        break;
+      default:
+        setPlaceholder('Describe your request...');
+    }
   }, [mode]);
 
   const handleSubmit = async () => {
+    const payload = {
+      prompt,
+      mode,
+      topic,
+      derech,
+      profile,
+      shiurAudience,
+      chavrutaPartner,
+      storyType,
+      storyAudience,
+      simchaType,
+      simchaTone,
+      dvarOccasion,
+      dvarStyle,
+      gematriaType,
+      deliverables
+    };
+
+    console.log("📤 Sending to /api/guru:", payload);
+
     setOutput('⏳ Processing with Guru Mode...');
     setProgress(10);
+
     try {
       const res = await fetch('/api/guru', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          mode,
-          topic,
-          derech,
-          profile,
-          shiurAudience,
-          chavrutaPartner,
-          storyType,
-          storyAudience,
-          simchaType,
-          simchaTone,
-          dvarOccasion,
-          dvarStyle,
-          gematriaType,
-          deliverables
-        }),
+        body: JSON.stringify(payload),
       });
       setProgress(60);
       const data = await res.json();
@@ -90,9 +113,7 @@ export default function Home() {
   };
 
   const handleCopy = () => {
-    if (outputRef.current) {
-      navigator.clipboard.writeText(outputRef.current.innerText);
-    }
+    if (outputRef.current) navigator.clipboard.writeText(outputRef.current.innerText);
   };
 
   const handlePrint = () => {
@@ -108,6 +129,14 @@ export default function Home() {
     link.href = URL.createObjectURL(blob);
     link.download = 'guru-output.txt';
     link.click();
+  };
+
+  const handleSourceSheet = () => {
+    alert('📄 Source Sheet generation coming soon!');
+  };
+
+  const handleAudio = () => {
+    alert('🎧 Audio generation coming soon!');
   };
 
   return (
@@ -196,8 +225,8 @@ export default function Home() {
             <button className="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded" onClick={handleCopy}>Copy</button>
             <button className="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded" onClick={handlePrint}>Print</button>
             <button className="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded" onClick={handleDownload}>Download</button>
-            <button className="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded">Source Sheet</button>
-            <button className="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded">Audio</button>
+            <button className="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded" onClick={handleSourceSheet}>Source Sheet</button>
+            <button className="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded" onClick={handleAudio}>Audio</button>
           </div>
           <pre ref={outputRef} className="bg-gray-100 p-4 rounded whitespace-pre-wrap font-mono">{output}</pre>
         </div>
@@ -205,6 +234,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 
